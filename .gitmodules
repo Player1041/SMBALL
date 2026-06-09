@@ -1,0 +1,3 @@
+[submodule "PyCheevos"]
+	path = PyCheevos
+	url = https://github.com/CarlosNatanael/PyCheevos
