@@ -10,6 +10,7 @@ LevelTable = dict[tuple[int | str, int], tuple[int, str, int]]
 
 @dataclass
 class GameProfile:
+    profile_identifier:          Any = None                 # String used to identify the profile for allowing extra variables to be defined
     # Options
     character_selected:          Any = None                 # [8-bit] Selected Character
                                                             # 0x00 - AiAi
@@ -49,7 +50,8 @@ class GameProfile:
 
     lives:                       Any = None                 # [8-bit] Lives | +1 from display
     deaths:                      Any = None                 # [32-bit BE] Death Counter for Challenge Mode | Used in hacks with no life counter i.e Gaiden
- 
+    continues_used:              Any = None                 # [16-bit BE] Total Continues used
+    
     # Goals
     goal_state:                  Any = None                 # [8-bit bitflags] Goal State
     goal_type:                   Any = None                 # [8-bit] Goal Type

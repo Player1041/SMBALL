@@ -18,6 +18,7 @@ template_smb2_profile = GameProfile(
     speed_pointer               = None,
     lives                       = None,
     deaths                      = None,
+    continues_used              = None,
 
     goal_state                  = None, # remember: keep as hex, don't put into mem expr
     goal_type                   = None,
@@ -53,6 +54,7 @@ default_smb2_profile = GameProfile(
     speed_pointer               = (dword_be(0x5ed1c4) & mask),
     lives                       = byte(0x5bc9a2),
     deaths                      = dword_be(0x969c80),
+    continues_used              = word_be(0x55399a),
 
     goal_state                  = 0x553973,
     goal_type                   = byte(0x5539a8),

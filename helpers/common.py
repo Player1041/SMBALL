@@ -61,7 +61,7 @@ def inverted_bounding(ctx: GameProfile,
                 and_next(ctx.z_coord <= z2)
             ]
         
-def story_level(ctx: GameProfile, world: int | str, level: int) -> tuple[int, str, int]:
+def get_level(ctx: GameProfile, world: int | str, level: int) -> tuple[int, str, int]:
     if (world, level) not in ctx.LEVEL_TABLE:
         raise ValueError(f"No entry for World {world}-{level}")
     return ctx.LEVEL_TABLE[(world, level)]
@@ -150,3 +150,7 @@ def stay_above_speed_check(ctx: GameProfile, minimum_speed):
         add_source(ctx.speed_pointer >> ctx.speed_tens),
         reset_if(ctx.speed_pointer >> ctx.speed_ones < value(minimum_speed))
     ]
+
+def pause(ctx: GameProfile):
+    """Add a pauseless condition to an achievement."""
+    return reset_if(ctx.paused == 0x01)
