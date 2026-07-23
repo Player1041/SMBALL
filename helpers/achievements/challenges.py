@@ -39,12 +39,12 @@ def timed(ctx: GameProfile, mode: str, world, level, starting_time, within_time)
         float(within_time)
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         reset_if(ctx.stage_time == ((starting_time - within_time) * 60)),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0)
     ]
 
@@ -74,10 +74,10 @@ def over_speed(ctx: GameProfile, mode: str, world, level, required_speed: int):
     
     logic = [
         *mode_check*(mode),
-        level_check(world, level),
+        level_check(ctx, world, level),
         over_speed_check(ctx, required_speed),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         ctx.stage_time != 0x00
     ]
 
@@ -103,10 +103,10 @@ def under_speed(ctx: GameProfile, mode: str, world, level, required_speed: int):
     
     logic = [
         *mode_check*(mode),
-        level_check(world, level),
+        level_check(ctx, world, level),
         under_speed_check(ctx, required_speed),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         ctx.stage_time != 0x00
     ]
 
@@ -132,11 +132,11 @@ def miminum_speed_hit(ctx: GameProfile, mode: str, world, level, starting_time, 
     
     logic = [
         *mode_check*(mode),
-        reset_level_check(world, level),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         over_speed_at_any_point_check(ctx, required_speed),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time != 0x00)
     ]
 
@@ -167,13 +167,13 @@ def all_bananas_collected(ctx: GameProfile, mode: str, world, level, starting_ti
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         (ctx.bananas_remaining != 0x00).with_hits(1),
         trigger(ctx.bananas_remaining),
-        trigger(ctx.stage_complete_prior),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_prior == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
 
@@ -196,12 +196,12 @@ def banana_bunches_collected(ctx: GameProfile, mode: str, world, level, total_co
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         add_source(value(1000)),
         trigger((ctx.score_global.delta() == ctx.score_global).with_hits(total_collected)),
-        trigger(ctx.stage_complete_prior),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_prior == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
     return logic
@@ -225,8 +225,8 @@ def minimum_bananas_collected(ctx: GameProfile, mode: str, world, level, startin
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time)
     ]
 
@@ -236,8 +236,8 @@ def minimum_bananas_collected(ctx: GameProfile, mode: str, world, level, startin
 
     logic.extend([
         measured(ctx.bananas_collected > ctx.bananas_collected.delta()).with_hits(total_collected),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ])
 
@@ -265,12 +265,12 @@ def maximum_bananas_collected(ctx: GameProfile, mode: str, world, level, startin
         max_bananas += 1
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         reset_if(ctx.bananas_remaining < ctx.bananas_remaining.delta()).with_hits(max_bananas),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
 
@@ -293,12 +293,12 @@ def bananaless(ctx: GameProfile, mode: str, world, level, starting_time):
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         reset_if(ctx.bananas_remaining < ctx.bananas_remaining.delta()),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
 
@@ -324,13 +324,13 @@ def score_clear(ctx: GameProfile, mode: str, world, level, score_required):
         Total score needed at end of level
     """
     logic = [
-        *mode_check(mode),
-        level_check(world, level),
+        *mode_check(ctx, mode),
+        level_check(ctx, world, level),
         and_next(ctx.score_level != 0xffffffff),
-        trigger(ctx.level_score >= score_required),
-        trigger(ctx.replay_playing_delta),
-        trigger(ctx.replay_playing),
-        trigger(ctx.stage_complete),
+        trigger(ctx.score_level >= score_required),
+        trigger(ctx.replay_playing_delta == 0x00),
+        trigger(ctx.replay_playing == 0x01),
+        trigger(ctx.stage_complete == 0x01),
         ctx.stage_time != 0x00
     ]
 
@@ -356,13 +356,13 @@ def global_switchless(ctx: GameProfile, mode: str, world, level, starting_time):
         Level starting time. Should be treat as a float to allow for frame conversion, but accepts both ints and floats
     """
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         and_next(ctx.switch_pressed.delta() == 0x00),
         reset_if(ctx.switch_pressed == 0x01),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
 
@@ -386,8 +386,8 @@ def all_switches(ctx: GameProfile, mode: str, world, level, starting_time, boxes
         A list of bounding boxes using the bounding() and/or inverted_bounding().
     """
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time)
     ]
 
@@ -399,8 +399,8 @@ def all_switches(ctx: GameProfile, mode: str, world, level, starting_time, boxes
         ])
 
     logic.extend([
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ])
 
@@ -425,8 +425,8 @@ def miss_specific_switch(ctx: GameProfile, mode: str, world, level, starting_tim
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time)
     ]
 
@@ -438,8 +438,8 @@ def miss_specific_switch(ctx: GameProfile, mode: str, world, level, starting_tim
         ])
     
     logic.extend([
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ])
     return logic
@@ -465,8 +465,8 @@ def miss_every_switch_bar_one(ctx: GameProfile, mode: str, world, level, startin
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time)
     ]
 
@@ -489,8 +489,8 @@ def miss_every_switch_bar_one(ctx: GameProfile, mode: str, world, level, startin
                 ])
 
     logic.extend([
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ])
     
@@ -524,13 +524,13 @@ def limited_wormhole_entries(ctx: GameProfile, mode: str, world, level, starting
         max_wormhole_entries += 1
     
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         # do add address(wormhole_entered) if still buggy
         time_checkpoint(ctx, starting_time),
         reset_if(ctx.wormhole_entries > ctx.wormhole_entries.delta()).with_hits(max_wormhole_entries),
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
 
@@ -559,8 +559,8 @@ def special_path(ctx: GameProfile, mode: str, world, level, starting_time, start
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
         *start_reset,
         reset_next_if(value(0x00) == value(0x00)) # resets if the player has entered the box
@@ -568,8 +568,8 @@ def special_path(ctx: GameProfile, mode: str, world, level, starting_time, start
         value(0x00) == value(0x00).with_hits(1), # incurs a hit if the player is inside the box
         *end_checkpoint,
         trigger(value(0x00) == value(0x00).with_hits(1)), # incurs a hit if the player is inside the box, trigger makes it clear to see if the challenge is active or not
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ]
 
@@ -600,8 +600,8 @@ def multiple_special_paths(ctx: GameProfile, mode: str, world, level, starting_t
     """
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint(ctx, starting_time),
     ]
 
@@ -617,8 +617,8 @@ def multiple_special_paths(ctx: GameProfile, mode: str, world, level, starting_t
         ])
 
     logic.extend([
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ])
     return logic
@@ -651,8 +651,8 @@ def multiple_goals_within_x_time(ctx: GameProfile, mode: str, world, level, star
         float(within_time)
 
     logic = [
-        *mode_check(mode),
-        reset_level_check(world, level),
+        *mode_check(ctx, mode),
+        reset_level_check(ctx, world, level),
         time_checkpoint_multiple_sessions(ctx, starting_time),
         (ctx.stage_time.prior() == starting_time * 60).with_hits(1)
     ]
@@ -661,8 +661,8 @@ def multiple_goals_within_x_time(ctx: GameProfile, mode: str, world, level, star
         logic.extend(goal)
 
     logic.extend([
-        trigger(ctx.stage_complete_delta),
-        trigger(ctx.stage_complete),
+        trigger(ctx.stage_complete_delta == 0x00),
+        trigger(ctx.stage_complete == 0x01),
         reset_if(ctx.stage_time == 0x00)
     ])
 

@@ -3,7 +3,8 @@ from profiles import GameProfile
 
 _REGISTRY: dict[str, object] = {
     "Gaiden":   default_smb2_profile,
-    "349":      default_smb2_profile
+    "349":      default_smb2_profile,
+    "651":      default_smb2_profile
 }
 
 def get_profile(game: str) -> GameProfile:

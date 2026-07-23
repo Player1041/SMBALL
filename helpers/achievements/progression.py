@@ -1,6 +1,7 @@
 from pycheevos.core.helpers import *
 from profiles import GameProfile
 from helpers.common import *
+from typing import List
 
 # //
 # Story Mode
@@ -16,10 +17,10 @@ def story_world_clear(ctx: GameProfile, world: int):
         World number e.g. 1, 3, 5
     """
     logic = [
-        *mode_check("story"),
+        *mode_check(ctx, "story"),
     ]
     match world:
-        case 10:
+        case 19:
             logic.extend([
                 ctx.world.delta() == 9,
                 level_check("StaffRoll", "1")
@@ -43,7 +44,7 @@ def collect_x_bananas_story(ctx: GameProfile, banana_count: int):
     """
 
     logic = [
-        *mode_check("story"),
+        *mode_check(ctx, "story"),
         ctx.bananas_collected.delta() < banana_count,
         ctx.bananas_collected >= banana_count
     ]
@@ -52,7 +53,7 @@ def collect_x_bananas_story(ctx: GameProfile, banana_count: int):
 
 def bananaless_story(ctx: GameProfile):
     logic = [
-        *mode_check("story"),
+        *mode_check(ctx, "story"),
         ctx.bananas_collected == 0x00,
         get_level("StaffRoll", 1)
     ]
@@ -76,7 +77,7 @@ def challenge_mode_complete(ctx: GameProfile, difficulty: str, total_levels: int
     """
 
     logic = [
-        *mode_check("challenge"),
+        *mode_check(ctx, "challenge"),
     ]
 
     match difficulty.lower():
@@ -117,7 +118,7 @@ def challenge_and_extra_deathless(ctx: GameProfile, difficulty: str, stage_1_sta
     """
 
     logic = [
-        *mode_check("challenge")
+        *mode_check(ctx, "challenge")
     ]
 
     match difficulty.lower():
@@ -169,7 +170,7 @@ def challenge_and_extra_continueless(ctx: GameProfile, difficulty: str, stage_1_
     """
 
     logic = [
-        *mode_check("challenge")
+        *mode_check(ctx, "challenge")
     ]
 
     match difficulty.lower():
@@ -221,7 +222,7 @@ def challenge_and_extra_warpless(ctx: GameProfile, difficulty: str, stage_1_star
     """
 
     logic = [
-        *mode_check("challenge")
+        *mode_check(ctx, "challenge")
     ]
 
     match difficulty.lower():
@@ -272,7 +273,7 @@ def challenge_and_extra_warpless_deathless(ctx: GameProfile, difficulty: str, st
     """
 
     logic = [
-        *mode_check("challenge")
+        *mode_check(ctx, "challenge")
     ]
 
     match difficulty.lower():
@@ -326,7 +327,7 @@ def challenge_and_extra_warpless_continueless(ctx: GameProfile, difficulty: str,
     """
 
     logic = [
-        *mode_check("challenge")
+        *mode_check(ctx, "challenge")
     ]
 
     match difficulty.lower():
@@ -365,7 +366,7 @@ def challenge_and_extra_warpless_continueless(ctx: GameProfile, difficulty: str,
     
     return logic, resetAltLogic
 
-def custom_clear_route(ctx: GameProfile, level_order: List() = []):
+def custom_clear_route(ctx: GameProfile, level_order: List = []):
     """Define a custom route for the player to clear, useful for shortest routes.
     Parameters
     ----------
@@ -376,14 +377,14 @@ def custom_clear_route(ctx: GameProfile, level_order: List() = []):
     """
 
     logic = [
-        *mode_check("challenge")
+        *mode_check(ctx, "challenge")
     ]
 
     for level in level_order:
         logic.extend(level)
     
     resetAltLogic = [
-        reset_in(ctx.in_game == 0x00) # reset if not in game
+        reset_if(ctx.in_game == 0x00) # reset if not in game
     ]
 
     return logic, resetAltLogic
@@ -395,6 +396,7 @@ def custom_clear_route(ctx: GameProfile, level_order: List() = []):
 def clear_level_type(ctx: GameProfile, world, level: int, goal_type: str):
     """Check if a level has been completed via a specific goal"""
     hex_code, _, _, = get_level(ctx, world, level)
+    hex_goal = 0x00
     match goal_type.lower():
         case "blue":
             hex_goal == 0x00
@@ -413,6 +415,7 @@ def clear_level_type(ctx: GameProfile, world, level: int, goal_type: str):
 def clear_level_type_no_hits(ctx: GameProfile, world, level: int, goal_type: str):
     """Check if a level has been completed via a specific goal"""
     hex_code, _, _, = get_level(ctx, world, level)
+    hex_goal = 0x00
     match goal_type.lower():
         case "blue":
             hex_goal == 0x00

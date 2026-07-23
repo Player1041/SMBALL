@@ -69,13 +69,13 @@ def get_level(ctx: GameProfile, world: int | str, level: int) -> tuple[int, str,
 def level_check(ctx: GameProfile, world, level):
     """Search the level table to retrieve its hex code."""
 
-    hex_code, _, _ = story_level(world, level)
-    return ctx.level_id == hex_code
+    hex_code, _, _ = get_level(ctx, world, level)
+    return ctx.level == hex_code
 
 def reset_level_check(ctx: GameProfile, world, level):
     """Search the level table to retrieve the hex code, and reset hits if not in that level"""
-    hex_code, _, _ = story_level(world, level)
-    return reset_if(ctx.level_id == hex_code)
+    hex_code, _, _ = get_level(ctx, world, level)
+    return reset_if(ctx.level != hex_code)
 
 def mode_check(ctx: GameProfile, mode):
     """Check which mode you want the player to play in."""
